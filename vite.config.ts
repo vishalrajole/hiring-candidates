@@ -11,7 +11,21 @@ export default defineConfig(({ mode }) => {
       port: 3000,
     },
     plugins: [
-      react(),
+      react({
+        babel: {
+          plugins: [
+            [
+              "babel-plugin-styled-components",
+              {
+                displayName: true,
+                ssr: false,
+                pure: true,
+                fileName: false,
+              },
+            ],
+          ],
+        },
+      }),
       checker({
         typescript: true,
         eslint: {
