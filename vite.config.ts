@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => {
       react(),
       checker({
         typescript: true,
+        eslint: {
+          lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+        },
         overlay: {
           initialIsOpen: false,
         },
