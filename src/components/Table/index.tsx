@@ -23,18 +23,11 @@ interface TableProps {
 }
 
 const Table = ({ headings, items, onSort }: TableProps) => {
-  //   const [data, setData] = useState<Item[]>([]);
   const [sortDirection, setSortDirection] = useState<string>("");
-
-  //   useEffect(() => {
-  //     setData(items);
-  //   }, [items]);
 
   const onSortClick = (key: string) => {
     setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    // const sorted = sortBy(items, key, sortDirection);
     onSort(key, sortDirection);
-    // setData(sorted);
   };
 
   return (
@@ -63,7 +56,7 @@ const Table = ({ headings, items, onSort }: TableProps) => {
         </tr>
       </thead>
       <tbody>
-        {items.map((item: Item) => {
+        {items.map((item: any) => {
           return (
             <tr key={item.id}>
               {headings.map(({ key }) => {
