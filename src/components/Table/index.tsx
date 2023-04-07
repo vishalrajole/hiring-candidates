@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { UpIcon } from "../Icons/UpIcon";
 import { DownIcon } from "../Icons/DownIcon";
-import { sortBy } from "../../utils/sort";
+// import { sortBy } from "../../utils/sort";
 
 import * as S from "./styles";
 
@@ -19,20 +19,22 @@ interface Item {
 interface TableProps {
   headings: Array<Heading>;
   items: Array<any>;
+  onSort: (columnName: string, direction: string) => void;
 }
 
-const Table = ({ headings, items }: TableProps) => {
-  const [data, setData] = useState<Item[]>([]);
+const Table = ({ headings, items, onSort }: TableProps) => {
+  //   const [data, setData] = useState<Item[]>([]);
   const [sortDirection, setSortDirection] = useState<string>("");
 
-  useEffect(() => {
-    setData(items);
-  }, [items]);
+  //   useEffect(() => {
+  //     setData(items);
+  //   }, [items]);
 
-  const onSort = (key: string) => {
+  const onSortClick = (key: string) => {
     setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    const sorted = sortBy(data, key, sortDirection);
-    setData(sorted);
+    // const sorted = sortBy(items, key, sortDirection);
+    onSort(key, sortDirection);
+    // setData(sorted);
   };
 
   return (
@@ -44,7 +46,7 @@ const Table = ({ headings, items }: TableProps) => {
               <S.TableHeading
                 key={heading.label}
                 {...(heading.sortable && {
-                  onClick: () => onSort(heading.key),
+                  onClick: () => onSortClick(heading.key),
                 })}
               >
                 {heading.label}
@@ -61,7 +63,7 @@ const Table = ({ headings, items }: TableProps) => {
         </tr>
       </thead>
       <tbody>
-        {data.map((item: Item) => {
+        {items.map((item: Item) => {
           return (
             <tr key={item.id}>
               {headings.map(({ key }) => {

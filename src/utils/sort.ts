@@ -1,5 +1,5 @@
 // copied
-export const sortBy = (
+export const sortByItems = (
   items: Array<any>,
   key: string,
   sortDirection: string

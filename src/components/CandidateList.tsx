@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, SetStateAction } from "react";
 import { useSearchParams } from "react-router-dom";
+import queryString from "query-string";
+import { sortByItems } from "../utils/sort";
 import { debounce } from "../utils/debounce";
 import Input from "./Input";
 import Table from "./Table";
@@ -19,28 +21,65 @@ const CandidateList = () => {
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    setFilteredCandidates(candidates);
-  }, [candidates]);
-
-  useEffect(() => {
     const currentParams = Object.fromEntries([...searchParams]);
-    console.log("currentParams", currentParams);
-  }, [searchParams]);
 
-  const filterItems = debounce((value: string) => {
-    if (value) {
-      const newItems = candidates.filter((item: Candidate) => {
-        return item.name.toLowerCase().indexOf(value.toLowerCase()) > -1;
+    setSearchText(currentParams?.searchText);
+
+    if (candidates?.length > 0) {
+      filterItems({
+        searchText: currentParams?.searchText,
+        sortBy: currentParams?.sortBy,
+        direction: currentParams?.direction,
       });
-      setFilteredCandidates(newItems);
-    } else {
-      setFilteredCandidates(candidates);
     }
-  }, 100);
+  }, [candidates, searchParams]);
 
-  const onSearch = (value: string) => {
-    setSearchText(value);
-    filterItems(value);
+  const filterItems = ({
+    searchText,
+    sortBy,
+    direction,
+  }: {
+    searchText: string;
+    sortBy: string;
+    direction: string;
+  }) => {
+    let filteredResult: SetStateAction<Candidate[]> = candidates;
+
+    if (searchText) {
+      filteredResult = candidates?.filter((item: Candidate) => {
+        return item.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
+      });
+    }
+
+    if (sortBy && direction) {
+      filteredResult = sortByItems(filteredResult, sortBy, direction);
+    }
+    setFilteredCandidates(filteredResult);
+  };
+
+  const onSearch = (searchText: string) => {
+    const currentParams = Object.fromEntries([...searchParams]);
+
+    const urlParams = {
+      ...currentParams,
+      searchText,
+    };
+    setSearchParams(
+      queryString.stringify(urlParams, { skipEmptyString: true })
+    );
+  };
+
+  const onSort = (columnName: string, direction: string) => {
+    const currentParams = Object.fromEntries([...searchParams]);
+
+    const urlParams = {
+      ...currentParams,
+      sortBy: columnName,
+      direction,
+    };
+    setSearchParams(
+      queryString.stringify(urlParams, { skipEmptyString: true })
+    );
   };
 
   return (
@@ -59,7 +98,11 @@ const CandidateList = () => {
         ) : null}
 
         {filteredCandidates?.length && !isError && !showLoader ? (
-          <Table headings={Headings} items={filteredCandidates} />
+          <Table
+            headings={Headings}
+            items={filteredCandidates}
+            onSort={onSort}
+          />
         ) : null}
         {isError && !filteredCandidates?.length && (
           <S.Message type="error">Failed to fetch items</S.Message>
