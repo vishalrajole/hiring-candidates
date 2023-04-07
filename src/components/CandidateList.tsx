@@ -1,42 +1,31 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { debounce } from "../utils/debounce";
-import * as S from "./styles";
 import Input from "./Input";
 import Table from "./Table";
 import { Headings } from "./Headings";
 import Spinner from "./Spinner";
 import { Candidate } from "../@types/Candidate";
-
-export const BASE_PATH = "https://personio-fe-coding-challenge.vercel.app/api";
+import useCandidate from "../utils/useCandidate";
+import * as S from "./styles";
 
 const CandidateList = () => {
-  const [candidates, setCandidates] = useState<Array<Candidate>>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filteredCandidates, setFilteredCandidates] = useState<
     Array<Candidate>
   >([]);
-  const [isError, setIsError] = useState(false);
-  const [showLoader, setShowLoader] = useState(false);
 
+  const { candidates, showLoader, isError } = useCandidate();
   const [searchText, setSearchText] = useState("");
 
-  const fetchCandidates = async () => {
-    try {
-      setShowLoader(true);
-      const response = await fetch(`${BASE_PATH}/candidates`);
-      const candidates = await response.json();
-      setCandidates(candidates.data);
-      setFilteredCandidates(candidates.data);
-      setShowLoader(false);
-    } catch (error) {
-      console.log("candidates fetch error", error);
-      setShowLoader(false);
-      setIsError(true);
-    }
-  };
+  useEffect(() => {
+    setFilteredCandidates(candidates);
+  }, [candidates]);
 
   useEffect(() => {
-    fetchCandidates();
-  }, []);
+    const currentParams = Object.fromEntries([...searchParams]);
+    console.log("currentParams", currentParams);
+  }, [searchParams]);
 
   const filterItems = debounce((value: string) => {
     if (value) {
@@ -70,11 +59,7 @@ const CandidateList = () => {
         ) : null}
 
         {filteredCandidates?.length && !isError && !showLoader ? (
-          <Table
-            headings={Headings}
-            items={filteredCandidates}
-            onRowClick={() => {}}
-          />
+          <Table headings={Headings} items={filteredCandidates} />
         ) : null}
         {isError && !filteredCandidates?.length && (
           <S.Message type="error">Failed to fetch items</S.Message>
